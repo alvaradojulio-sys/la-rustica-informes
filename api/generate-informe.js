@@ -37,6 +37,7 @@ Transcripción de la nota de voz:
 """${transcript}"""`;
 
   try {
+    console.log('Llamando a Hugging Face API...');
     const resp = await fetch('https://api-inference.huggingface.co/models/mistralai/Mistral-7B-Instruct-v0.3', {
       method: 'POST',
       headers: {
@@ -49,12 +50,15 @@ Transcripción de la nota de voz:
       })
     });
 
+    console.log('Respuesta de Hugging Face:', resp.status);
     if (!resp.ok) {
       const errText = await resp.text();
+      console.log('Error de HF:', errText);
       return res.status(resp.status).json({ error: `Hugging Face API respondió ${resp.status}: ${errText.slice(0, 300)}` });
     }
 
     const data = await resp.json();
+    console.log('Datos recibidos:', JSON.stringify(data).slice(0, 200));
     const generated = Array.isArray(data) ? data[0]?.generated_text : data.generated_text;
     if (!generated) return res.status(502).json({ error: 'La respuesta no tuvo contenido.' });
 
@@ -65,6 +69,7 @@ Transcripción de la nota de voz:
     const parsed = JSON.parse(jsonMatch[0]);
     return res.status(200).json(parsed);
   } catch (err) {
+    console.error('Error en generate-informe:', err);
     return res.status(500).json({ error: err.message || 'Error inesperado generando el informe.' });
   }
 }
