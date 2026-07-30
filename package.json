@@ -1,0 +1,6 @@
+{
+  "name": "la-rustica-informes",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Informes de campo de La Rústica — frontend estático + función serverless en Vercel + Supabase."
+}

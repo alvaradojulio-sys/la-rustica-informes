@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>La Rústica · Informes (solo lectura)</title>
+<link href="https://fonts.googleapis.com/css2?family=Anton&family=Share+Tech+Mono&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root{--crema:#E7DBCC;--bronce:#A7926F;--negro:#000000;--gris:#A19587;}
+  *{box-sizing:border-box;}
+  body{margin:0;background:var(--crema);color:var(--negro);font-family:'Inter',sans-serif;padding-bottom:40px;}
+  header{background:var(--negro);color:var(--crema);padding:18px 20px;display:flex;align-items:center;gap:10px;}
+  header .stamp{width:30px;height:30px;border-radius:7px;background:var(--bronce);color:var(--negro);display:flex;align-items:center;justify-content:center;font-family:'Anton',sans-serif;font-size:13px;}
+  header h1{font-family:'Anton',sans-serif;font-size:18px;text-transform:uppercase;margin:0;letter-spacing:.03em;}
+  header .sub{font-family:'Share Tech Mono',monospace;font-size:11px;opacity:.75;}
+  main{max-width:760px;margin:0 auto;padding:16px;}
+  .filters{display:flex;gap:8px;margin-bottom:16px;flex-wrap:wrap;}
+  .filters select{border:1px solid var(--gris);border-radius:4px;padding:8px 10px;font-size:13px;background:#fff;}
+  .item{background:#fff;border:1px solid var(--gris);border-radius:4px;padding:14px 16px;margin-bottom:12px;}
+  .item .row1{display:flex;justify-content:space-between;gap:8px;align-items:flex-start;}
+  .item .cliente{font-family:'Anton',sans-serif;font-size:16px;text-transform:uppercase;}
+  .item .fecha{font-family:'Share Tech Mono',monospace;font-size:11px;color:#8a8378;margin-top:3px;}
+  .pill{font-family:'Share Tech Mono',monospace;font-size:10px;text-transform:uppercase;padding:3px 9px;border-radius:3px;font-weight:700;}
+  .pill.borrador{background:#F1E6D2;color:#8A5A1E;}
+  .pill.enviado{background:#DEE6DB;color:#3E5B3C;}
+  .informe{font-size:13.5px;line-height:1.6;white-space:pre-wrap;margin-top:10px;color:#333;}
+  .loading, .empty{text-align:center;color:#8a8378;padding:40px 20px;font-size:13.5px;}
+</style>
+</head>
+<body>
+<header>
+  <div class="stamp">LR</div>
+  <div>
+    <h1>La Rústica</h1>
+    <div class="sub">Informes · vista de solo lectura</div>
+  </div>
+</header>
+<main>
+  <div class="filters">
+    <select id="filterCliente"><option value="">Todos los clientes</option></select>
+    <select id="filterEstado">
+      <option value="">Todos los estados</option>
+      <option value="borrador">Borrador</option>
+      <option value="enviado">Enviado</option>
+    </select>
+  </div>
+  <div id="list" class="loading">Cargando informes…</div>
+</main>
+
+<script src="https://unpkg.com/@supabase/supabase-js@2"></script>
+<script src="config.js"></script>
+<script>
+  const supa = window.supabase.createClient(window.APP_CONFIG.SUPABASE_URL, window.APP_CONFIG.SUPABASE_ANON_KEY);
+  let all = [];
+
+  function escapeHtml(s){ return (s||'').replace(/[&<>"']/g, c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); }
+
+  function render(){
+    const c = document.getElementById('filterCliente').value;
+    const e = document.getElementById('filterEstado').value;
+    const filtered = all.filter(v => (!c || v.cliente===c) && (!e || v.estado===e));
+    const list = document.getElementById('list');
+    if(filtered.length===0){ list.innerHTML = '<div class="empty">No hay informes para este filtro.</div>'; list.className='empty'; return; }
+    list.className = '';
+    list.innerHTML = filtered.map(v=>{
+      const [y,m,d] = (v.fecha||'').split('-');
+      return `<div class="item">
+        <div class="row1">
+          <div>
+            <div class="cliente">${escapeHtml(v.cliente)}</div>
+            <div class="fecha">${d}/${m}/${y} · ${v.hora}${v.lat ? ' · '+v.lat+', '+v.lon : ''}</div>
+          </div>
+          <span class="pill ${v.estado}">${v.estado}</span>
+        </div>
+        <div class="informe">${escapeHtml(v.informe)}</div>
+      </div>`;
+    }).join('');
+  }
+
+  async function load(){
+    const { data, error } = await supa.from('visitas').select('*').order('creado', { ascending:false });
+    if(error){ document.getElementById('list').textContent = 'No se pudieron cargar los informes.'; return; }
+    all = data || [];
+    const clientes = [...new Set(all.map(v=>v.cliente))].sort();
+    document.getElementById('filterCliente').innerHTML = '<option value="">Todos los clientes</option>' +
+      clientes.map(c=>`<option value="${escapeHtml(c)}">${escapeHtml(c)}</option>`).join('');
+    render();
+  }
+  document.getElementById('filterCliente').addEventListener('change', render);
+  document.getElementById('filterEstado').addEventListener('change', render);
+  load();
+</script>
+</body>
+</html>

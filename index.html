@@ -1,0 +1,261 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#000000">
+<title>La Rústica · Informes de campo</title>
+<link rel="manifest" href="manifest.json">
+<link rel="icon" href="icon-192.png">
+<link rel="apple-touch-icon" href="icon-192.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Anton&family=Share+Tech+Mono&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --crema:#E7DBCC;
+  --bronce:#A7926F;
+  --negro:#000000;
+  --gris:#A19587;
+  --ok:#5C7A5A;
+  --alerta:#B5652E;
+  font-family:'Inter',sans-serif;
+}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent;}
+html,body{margin:0;padding:0;background:var(--crema);color:var(--negro);height:100%;}
+body{padding-bottom:78px;overscroll-behavior-y:none;}
+h1,h2,h3{font-family:'Anton',sans-serif;font-weight:400;letter-spacing:.03em;text-transform:uppercase;margin:0;}
+.mono{font-family:'Share Tech Mono',monospace;}
+button{font-family:inherit;cursor:pointer;}
+input,textarea,select{font-family:inherit;}
+
+header.top{
+  position:sticky;top:0;z-index:20;background:var(--negro);color:var(--crema);
+  padding:14px 18px 14px 18px;padding-top:calc(14px + env(safe-area-inset-top,0));
+  display:flex;align-items:center;gap:11px;
+}
+header.top .stamp{width:32px;height:32px;border-radius:8px;background:var(--bronce);display:flex;align-items:center;justify-content:center;font-family:'Anton',sans-serif;color:var(--negro);font-size:14px;flex-shrink:0;}
+header.top h1{font-size:19px;letter-spacing:.05em;}
+header.top .sub{font-size:11px;opacity:.75;font-family:'Share Tech Mono',monospace;margin-top:2px;text-transform:none;}
+
+main{padding:16px;max-width:640px;margin:0 auto;}
+.hidden{display:none !important;}
+
+nav.tabs{
+  position:fixed;bottom:0;left:0;right:0;z-index:30;
+  background:var(--negro);border-top:1px solid #2a2a2a;
+  display:flex;padding-bottom:env(safe-area-inset-bottom,0);
+}
+nav.tabs button{
+  flex:1;background:none;border:none;padding:10px 4px 8px;display:flex;flex-direction:column;align-items:center;gap:3px;
+  color:#8a8378;font-size:10.5px;font-weight:600;text-transform:uppercase;letter-spacing:.03em;
+}
+nav.tabs button svg{width:21px;height:21px;stroke:#8a8378;fill:none;stroke-width:1.8;}
+nav.tabs button.active{color:var(--bronce);}
+nav.tabs button.active svg{stroke:var(--bronce);}
+
+.card{background:#fff;border:1px solid var(--gris);border-radius:4px;padding:16px;margin-bottom:14px;}
+.section-title{font-size:11.5px;text-transform:uppercase;letter-spacing:.1em;color:var(--bronce);font-weight:600;margin-bottom:8px;font-family:'Share Tech Mono',monospace;}
+
+.recorder{display:flex;flex-direction:column;align-items:center;gap:10px;padding:8px 0 4px;}
+.mic-btn{
+  width:84px;height:84px;border-radius:50%;border:3px solid var(--negro);background:var(--bronce);color:var(--negro);
+  display:flex;align-items:center;justify-content:center;
+}
+.mic-btn svg{width:32px;height:32px;fill:var(--negro);}
+.mic-btn.recording{background:var(--alerta);animation:pulse 1.4s infinite;}
+@keyframes pulse{
+  0%{box-shadow:0 0 0 0 rgba(181,101,46,.45);}
+  70%{box-shadow:0 0 0 22px rgba(181,101,46,0);}
+  100%{box-shadow:0 0 0 0 rgba(181,101,46,0);}
+}
+.rec-time{font-family:'Share Tech Mono',monospace;font-size:13px;color:#6b655a;min-height:18px;}
+.rec-hint{font-size:12px;color:#8a8378;text-align:center;max-width:280px;}
+
+textarea.transcript{
+  width:100%;min-height:110px;border:1px solid var(--gris);border-radius:4px;padding:11px 12px;
+  font-size:14.5px;line-height:1.5;resize:vertical;background:#FBF9F5;
+}
+textarea.transcript:focus{outline:2px solid var(--bronce);outline-offset:1px;}
+
+.meta-row{display:flex;align-items:center;gap:9px;font-size:13px;color:var(--negro);padding:8px 0;border-bottom:1px solid var(--gris);}
+.meta-row:last-child{border-bottom:none;}
+.meta-row svg{width:17px;height:17px;stroke:var(--bronce);flex-shrink:0;}
+.meta-row .val{font-family:'Share Tech Mono',monospace;font-size:12px;color:#6b655a;}
+.meta-row .val.pending{color:var(--alerta);}
+.meta-row button.mini{margin-left:auto;background:none;border:1px solid var(--gris);border-radius:4px;padding:4px 9px;font-size:11.5px;color:var(--negro);}
+
+.photo-strip{display:flex;gap:8px;flex-wrap:wrap;margin-top:10px;}
+.photo-strip img{width:64px;height:64px;object-fit:cover;border-radius:4px;border:1px solid var(--gris);}
+.photo-add{width:64px;height:64px;border-radius:4px;border:1.5px dashed var(--gris);display:flex;align-items:center;justify-content:center;background:#FBF9F5;color:#8a8378;font-size:24px;}
+
+.btn{width:100%;padding:13px;border-radius:4px;border:none;font-size:13px;font-weight:700;margin-top:8px;text-transform:uppercase;letter-spacing:.04em;font-family:'Inter',sans-serif;}
+.btn-primary{background:var(--negro);color:var(--crema);}
+.btn-secondary{background:#fff;color:var(--negro);border:1.4px solid var(--negro);}
+.btn-ghost{background:none;color:#6b655a;border:1px solid var(--gris);}
+.btn:disabled{opacity:.4;}
+.btn-row{display:flex;gap:8px;}
+.btn-row .btn{margin-top:0;}
+
+.informe-box{background:#fff;border:1px solid var(--gris);border-radius:4px;padding:0;overflow:hidden;margin-top:6px;}
+.informe-head{background:var(--negro);color:var(--crema);padding:14px 16px;display:flex;align-items:center;gap:10px;}
+.informe-head .stamp{width:26px;height:26px;border-radius:6px;background:var(--bronce);color:var(--negro);display:flex;align-items:center;justify-content:center;font-family:'Anton',sans-serif;font-size:12px;flex-shrink:0;}
+.informe-head div{font-size:11.5px;font-family:'Share Tech Mono',monospace;opacity:.85;text-transform:none;}
+textarea.informe-text{width:100%;border:none;padding:16px;font-size:14.5px;line-height:1.65;min-height:260px;resize:vertical;font-family:'Inter',sans-serif;}
+textarea.informe-text:focus{outline:none;background:#FBF9F5;}
+
+.pill{display:inline-flex;align-items:center;gap:5px;padding:3px 10px;border-radius:3px;font-size:10.5px;font-weight:700;font-family:'Share Tech Mono',monospace;text-transform:uppercase;}
+.pill.borrador{background:#F1E6D2;color:#8A5A1E;}
+.pill.enviado{background:#DEE6DB;color:#3E5B3C;}
+
+.filters{display:flex;gap:8px;margin-bottom:12px;overflow-x:auto;padding-bottom:2px;}
+.filters select{border:1px solid var(--gris);border-radius:4px;padding:8px 10px;font-size:13px;background:#fff;color:var(--negro);flex-shrink:0;}
+.visit-item{background:#fff;border:1px solid var(--gris);border-radius:4px;padding:13px 14px;margin-bottom:10px;}
+.visit-item .row1{display:flex;justify-content:space-between;align-items:flex-start;gap:8px;}
+.visit-item .cliente{font-family:'Anton',sans-serif;font-size:16px;text-transform:uppercase;letter-spacing:.02em;}
+.visit-item .fecha{font-family:'Share Tech Mono',monospace;font-size:11px;color:#8a8378;margin-top:3px;}
+.visit-item .motivo{font-size:13px;color:#4a453d;margin-top:6px;line-height:1.4;}
+.empty-state{text-align:center;padding:50px 20px;color:#8a8378;}
+.empty-state svg{width:42px;height:42px;stroke:#c4bcac;margin-bottom:10px;}
+.empty-state p{font-size:13.5px;line-height:1.5;max-width:260px;margin:0 auto;}
+
+label.field{display:block;font-size:11.5px;font-weight:700;color:#6b655a;margin:14px 0 6px;text-transform:uppercase;letter-spacing:.04em;font-family:'Share Tech Mono',monospace;}
+label.field:first-of-type{margin-top:0;}
+input.field-input{width:100%;border:1px solid var(--gris);border-radius:4px;padding:11px 12px;font-size:14px;background:#FBF9F5;}
+.field-hint{font-size:11.5px;color:#8a8378;margin-top:5px;line-height:1.4;}
+
+#toast{position:fixed;bottom:90px;left:16px;right:16px;z-index:50;display:flex;flex-direction:column;gap:6px;align-items:center;pointer-events:none;}
+.toast-msg{background:var(--negro);color:var(--crema);padding:10px 16px;border-radius:4px;font-size:13px;max-width:400px;text-align:center;}
+
+.modal-bg{position:fixed;inset:0;background:rgba(0,0,0,.72);z-index:60;display:flex;align-items:center;justify-content:center;padding:20px;}
+
+@media print{
+  header.top, nav.tabs, .no-print{display:none !important;}
+  body{padding:0;background:#fff;}
+  .print-only{display:block !important;}
+}
+.print-only{display:none;}
+</style>
+</head>
+<body>
+
+<header class="top">
+  <div class="stamp">LR</div>
+  <div>
+    <h1>La Rústica</h1>
+    <div class="sub">Informes de campo</div>
+  </div>
+</header>
+
+<main>
+
+  <section id="tab-nueva">
+    <div class="card">
+      <div class="section-title">Nota de voz</div>
+      <div class="recorder">
+        <button class="mic-btn" id="micBtn" aria-label="Grabar">
+          <svg viewBox="0 0 24 24"><path d="M12 14a3 3 0 003-3V6a3 3 0 10-6 0v5a3 3 0 003 3zm5-3a5 5 0 01-10 0H5a7 7 0 006 6.92V21h2v-3.08A7 7 0 0019 11h-2z"/></svg>
+        </button>
+        <div class="rec-time" id="recTime"></div>
+        <div class="rec-hint" id="recHint">Tocá el micrófono y contá qué hiciste: cliente, animales atendidos, diagnóstico y tratamiento.</div>
+      </div>
+      <textarea class="transcript" id="transcriptBox" placeholder="La transcripción va a aparecer acá. También podés escribir o corregir directamente."></textarea>
+    </div>
+
+    <div class="card">
+      <div class="section-title">Datos de la visita</div>
+      <div class="meta-row">
+        <svg viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round"><path d="M12 21s7-6.5 7-12a7 7 0 10-14 0c0 5.5 7 12 7 12z"/><circle cx="12" cy="9" r="2.5"/></svg>
+        <span>Ubicación</span>
+        <span class="val pending" id="geoVal">sin capturar</span>
+        <button class="mini" id="geoBtn">Capturar</button>
+      </div>
+      <div class="meta-row">
+        <svg viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="17" rx="2"/><path d="M8 2v4M16 2v4M3 9h18"/></svg>
+        <span>Fecha / hora</span>
+        <span class="val" id="dateVal">—</span>
+      </div>
+      <div style="margin-top:12px;">
+        <div class="photo-strip" id="photoStrip">
+          <label class="photo-add" for="photoInput">＋</label>
+        </div>
+        <input type="file" id="photoInput" accept="image/*" capture="environment" multiple class="hidden">
+      </div>
+    </div>
+
+    <button class="btn btn-primary" id="genBtn">Generar informe</button>
+    <div id="genLog" style="font-size:12px;color:#8a8378;margin-top:8px;text-align:center;font-family:'Share Tech Mono',monospace;"></div>
+
+    <div id="informeSection" class="hidden">
+      <div class="card" style="margin-top:14px;">
+        <div class="section-title">Informe (editable)</div>
+        <input class="field-input" id="clienteInput" placeholder="Nombre del cliente / establecimiento" style="margin-bottom:10px;">
+        <div class="informe-box">
+          <div class="informe-head">
+            <div class="stamp">LR</div>
+            <div id="informeHeadMeta">—</div>
+          </div>
+          <textarea class="informe-text" id="informeText"></textarea>
+        </div>
+        <div class="btn-row" style="margin-top:12px;">
+          <button class="btn btn-secondary" id="copyBtn">Copiar (WhatsApp)</button>
+          <button class="btn btn-secondary" id="pdfBtn">Descargar PDF</button>
+        </div>
+        <button class="btn btn-primary" id="saveBtn">Guardar visita</button>
+      </div>
+    </div>
+  </section>
+
+  <section id="tab-historial" class="hidden">
+    <div class="filters">
+      <select id="filterCliente"><option value="">Todos los clientes</option></select>
+      <select id="filterEstado">
+        <option value="">Todos los estados</option>
+        <option value="borrador">Borrador</option>
+        <option value="enviado">Enviado</option>
+      </select>
+    </div>
+    <button class="btn btn-ghost no-print" id="syncBtn" style="margin-bottom:14px;">↻ Sincronizar</button>
+    <div id="visitList"></div>
+  </section>
+
+  <section id="tab-config" class="hidden">
+    <div class="card">
+      <div class="section-title">Datos del veterinario / responsable</div>
+      <label class="field">Nombre / clínica (aparece en el informe)</label>
+      <input class="field-input" id="cfgClinic" placeholder="Dr. Juan Pérez — La Rústica">
+      <div class="field-hint">La API key de Claude y las credenciales de Supabase ahora se configuran del lado del servidor (Vercel), no acá — ver README del proyecto.</div>
+      <button class="btn btn-primary" id="saveCfgBtn" style="margin-top:16px;">Guardar</button>
+    </div>
+    <div class="card">
+      <div class="section-title">Datos</div>
+      <div class="field-hint" style="margin-bottom:10px;">Las visitas y fotos se guardan en Supabase. Esta lista es un espejo local para poder cargar visitas sin conexión y sincronizarlas después.</div>
+      <button class="btn btn-ghost" id="exportJsonBtn">Exportar datos locales (JSON)</button>
+    </div>
+  </section>
+
+</main>
+
+<nav class="tabs no-print">
+  <button class="tab-btn active" data-tab="nueva">
+    <svg viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round"><path d="M12 14a3 3 0 003-3V6a3 3 0 10-6 0v5a3 3 0 003 3z"/><path d="M5 11a7 7 0 0014 0M12 18v3"/></svg>
+    Nueva visita
+  </button>
+  <button class="tab-btn" data-tab="historial">
+    <svg viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round"><path d="M4 5h16M4 12h16M4 19h10"/></svg>
+    Historial
+  </button>
+  <button class="tab-btn" data-tab="config">
+    <svg viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 00.33 1.82l.06.06a2 2 0 11-2.83 2.83l-.06-.06a1.65 1.65 0 00-1.82-.33 1.65 1.65 0 00-1 1.51V21a2 2 0 01-4 0v-.09A1.65 1.65 0 009 19.4a1.65 1.65 0 00-1.82.33l-.06.06a2 2 0 11-2.83-2.83l.06-.06A1.65 1.65 0 004.6 15a1.65 1.65 0 00-1.51-1H3a2 2 0 010-4h.09A1.65 1.65 0 004.6 9a1.65 1.65 0 00-.33-1.82l-.06-.06a2 2 0 112.83-2.83l.06.06A1.65 1.65 0 009 4.6a1.65 1.65 0 001-1.51V3a2 2 0 014 0v.09a1.65 1.65 0 001 1.51 1.65 1.65 0 001.82-.33l.06-.06a2 2 0 112.83 2.83l-.06.06A1.65 1.65 0 0019.4 9a1.65 1.65 0 001.51 1H21a2 2 0 010 4h-.09a1.65 1.65 0 00-1.51 1z"/></svg>
+    Config
+  </button>
+</nav>
+
+<div id="toast"></div>
+<div id="modalRoot"></div>
+<div class="print-only" id="printArea"></div>
+
+<script src="https://unpkg.com/@supabase/supabase-js@2"></script>
+<script src="config.js"></script>
+<script src="app.js"></script>
+</body>
+</html>
